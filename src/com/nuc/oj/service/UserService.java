@@ -14,4 +14,10 @@ public class UserService {
 		u.setAge(21);
 		userDao.add(u);
 	}
+	
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return super.toString();
+	}
 }
