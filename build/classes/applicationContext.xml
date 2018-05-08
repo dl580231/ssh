@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd ">
+	<context:component-scan base-package="com.nuc.oj.*"></context:component-scan>
+	
+	 <!--  hibernate ==================================================================================  -->
+	 <!-- 连接池 -->
+	 <context:property-placeholder location="classpath:db.properties"/>
+	<bean name="datasource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${jdbc.driverClass}"></property>
+		<property name="jdbcUrl" value="${jdbc.jdbcUrl}"></property>
+		<property name="user" value="${jdbc.user}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+	</bean>
+	<bean name="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="datasource"></property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialec">MySQL5Dialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.format_sql">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+			</props>
+		</property>
+		<property name="mappingDirectoryLocations" value="classpath:com/nuc/oj/entity"></property>
+	</bean> 
+	<!-- ================================================================================== -->
+	<!-- aop事务 -->
+	 <bean name="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+	 	<property name="sessionFactory" ref="sessionFactory"></property>
+	 </bean>
+<!-- 	注解处理事务 <tx:annotation-driven transaction-manager="transactionManager"/> -->
+	 <!--  配置事务织入  -->
+	 <tx:advice transaction-manager="transactionManager" id="txadvice">
+	 	<tx:attributes>
+	 		<tx:method name="*" isolation="REPEATABLE_READ" propagation="REQUIRED" read-only="false"/>
+	 	</tx:attributes>
+	 </tx:advice>
+	 <aop:config>
+	 	<aop:pointcut expression="execution(* com.nuc.oj.service.*Service.*(..))" id="tx"/>
+	 	<aop:advisor advice-ref="txadvice" pointcut-ref="tx"/>
+	 </aop:config>
+	 
+	 
+	 
+	 <!-- struts2======================================================================  -->
+	 <bean name="userAction" class="com.nuc.oj.action.UserAction" scope="prototype"></bean> 
+</beans>
+
+
+
+
+
+
+
